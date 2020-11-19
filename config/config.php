@@ -10,6 +10,6 @@
   );
   $pdo = new PDO(
     'mysql:host='.MYSQL_HOST.';dbname='.MYSQL_DATABASE,MYSQL_USER,MYSQL_PASSWORD,$options
-    )
+  );
 
 ?>
