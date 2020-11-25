@@ -1,6 +1,7 @@
 <?php
 
   if ($_SERVER['REQUEST_METHOD'] ==='POST') {
+
     if (!hash_equals($_SESSION['_token'], $_POST['_token'])) {
       echo "Invalid code";
       die();
@@ -18,7 +19,6 @@
       $_SESSION['_token'] = bin2hex(openssl_random_pesudo_bytes(32));
     }
   }
-
 
 
   function escape($html){

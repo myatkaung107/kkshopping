@@ -1,10 +1,12 @@
 <?php
+
+session_start();
 require '../config/config.php';
 require '../config/common.php';
-session_start();
 
 if (empty($_SESSION['user_id']) && empty($_SESSION['logged_in'])) {
   header('Location: login.php');
+
 }
 if ($_POST) {
   if (empty($_POST['name']) || empty($_POST['email']) || empty($_POST['password']) || strlen($_POST['password'])<4) {
@@ -43,7 +45,7 @@ if ($_POST) {
         array(
           ':name'=>$name,':email'=>$email,':password'=>$password,':role'=>$role)
       );
-      if ($result) {
+      if ($result) {        
         echo "<script>alert('New user is added');window.location.href='user_list.php';</script>";
       }
     }

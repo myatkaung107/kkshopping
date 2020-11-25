@@ -60,7 +60,7 @@ if (empty($_SESSION['user_id']) && empty($_SESSION['logged_in'])) {
           <!-- /.card-header -->
           <div class="card-body">
             <div>
-              <a href="user_add.php" type="button" class="btn btn-outline-success"><i class="fas fa-plus-square"></i></a>
+              <a href="user_add.php" type="button" class="btn btn-success"><i class="fas fa-plus-square">Create New</i></a>
             </div>
             <br>
             <table class="table table-bordered">
