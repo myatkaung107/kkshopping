@@ -5,6 +5,14 @@ if (session_status()==PHP_SESSION_NONE) {
 require 'config/config.php';
 require 'config/common.php';
 
+if (!empty($_POST['search'])) {
+  setcookie('search',$_POST['search'],time() + (86400*30),"/");
+}else {
+  if (empty($_GET['pageno'])) {
+    unset($_COOKIE['search']);
+    setcookie('search', null,-1, '/');
+  }
+}
 
 ?>
 <?php include('header.php') ?>
@@ -19,25 +27,34 @@ require 'config/common.php';
 
 
 
-		if (empty($_POST['search'])) {
+		if (empty($_POST['search'])&&empty($_COOKIE['search'])) {
 			if (!empty($_GET['category_id'])) {
-				$catId=$_GET['category_id'];
+				print"<pre>";
+				print_r($_GET['category_id']);
+				exit();
+				$catid=$_GET['category_id'];
 				$pdostmt=$pdo->prepare("SELECT * FROM products WHERE category_id=".$_GET['category_id']);
+				$pdostmt->execute();
+				$rawResult=$pdostmt->fetchAll();
+
+				$total_pages=ceil(count($rawResult)/$numOfrecs);
+
+				$pdostmt=$pdo->prepare("SELECT * FROM products WHERE category_id=".$_GET['category_id']." LIMIT $offset,$numOfrecs");
+				$pdostmt->execute();
+				$result=$pdostmt->fetchAll();
+			}else {
+				$pdostmt=$pdo->prepare("SELECT * FROM products ORDER BY id DESC");
+				$pdostmt->execute();
+				$rawResult=$pdostmt->fetchAll();
+
+				$total_pages=ceil(count($rawResult)/$numOfrecs);
+
+				$pdostmt=$pdo->prepare("SELECT * FROM products ORDER BY id DESC LIMIT $offset,$numOfrecs");
 				$pdostmt->execute();
 				$result=$pdostmt->fetchAll();
 			}
-
-			$pdostmt=$pdo->prepare("SELECT * FROM products ORDER BY id DESC");
-			$pdostmt->execute();
-			$rawResult=$pdostmt->fetchAll();
-
-			$total_pages=ceil(count($rawResult)/$numOfrecs);
-
-			$pdostmt=$pdo->prepare("SELECT * FROM products ORDER BY id DESC LIMIT $offset,$numOfrecs");
-			$pdostmt->execute();
-			$result=$pdostmt->fetchAll();
 		}else {
-			$searchKey=$_POST['search'];
+			$searchKey=!empty($_POST['search']) ? $_POST['search'] : $_COOKIE['search'];
 			$pdostmt=$pdo->prepare("SELECT * FROM products WHERE name LIKE '%$searchKey%' ORDER BY id DESC");
 			$pdostmt->execute();
 			$rawResult=$pdostmt->fetchAll();
@@ -50,21 +67,6 @@ require 'config/common.php';
 		}
 
 
-
-		
-		// if (!empty($_GET['category_id'])) {
-		//
-		// 	$categoryId=$_GET['category_id'];
-		// 	$pdostmt=$pdo->prepare("SELECT * FROM products WHERE category_id=".$_GET['category_id']);
-		// 	$pdostmt->execute();
-		// 	$rawResult=$pdostmt->fetchAll();
-		//
-		// 	$total_pages=ceil(count($rawResult)/$numOfrecs);
-		//
-		// 	$pdostmt=$pdo->parpare("SELECT * FROM products WHERE category_id=".$_GET['category_id']." LIMIT $offset,$numOfrecs");
-		// 	$pdostmt->execute();
-		// 	$result=$pdostmt->fetchAll();
-		// }
 	?>
 	<div class="container">
 		<div class="row">
@@ -77,7 +79,6 @@ require 'config/common.php';
 								$catstmt=$pdo->prepare("SELECT * FROM categories ORDER BY id DESC");
 								$catstmt->execute();
 								$catResult=$catstmt->fetchAll();
-
 							?>
 							<?php foreach ($catResult as $value) { ?>
 								<a data-toggle="collapse" href="index.php?category_id=<?php echo $value['id'] ?>"><span class="lnr lnr-arrow-right"></span><?php echo escape($value['name']) ?></a>

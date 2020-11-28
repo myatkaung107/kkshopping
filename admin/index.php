@@ -4,9 +4,20 @@ session_start();
 require '../config/config.php';
 require '../config/common.php';
 if (empty($_SESSION['user_id']) && empty($_SESSION['logged_in'])) {
-  header('Location: login.php');
+  header('Location: /admin/login.php');
 }
 
+if ($_SESSION['role']!=1) {
+  header('Location: /admin/login.php');
+}
+if (!empty($_POST['search'])) {
+  setcookie('search',$_POST['search'],time() + (86400*30),"/");
+}else {
+  if (empty($_GET['pageno'])) {
+    unset($_COOKIE['search']);
+    setcookie('search', null,-1, '/');
+  }
+}
 ?>
 
 <?php
@@ -31,7 +42,7 @@ include('header.php');
                   $numOfrecs=4;
                   $offset=($pageno-1)*$numOfrecs;
 
-                  if (empty($_POST['search'])) {
+                  if (empty($_POST['search'])&&empty($_COOKIE['search'])) {
                     $pdostmt=$pdo->prepare("SELECT * FROM products ORDER BY id DESC");
                     $pdostmt->execute();
                     $rawResult=$pdostmt->fetchAll();
@@ -41,9 +52,8 @@ include('header.php');
                     $pdostmt = $pdo->prepare("SELECT * FROM products ORDER BY id DESC LIMIT $offset,$numOfrecs");
                     $pdostmt-> execute();
                     $result=$pdostmt->fetchAll();
-
                   }else {
-                    $searchKey=$_POST['search'];
+                    $searchKey=!empty($_POST['search']) ? $_POST['search'] : $_COOKIE['search'];
                     $pdostmt=$pdo->prepare("SELECT * FROM products WHERE name LIKE '%$searchKey%' ORDER BY id DESC");
                     $pdostmt->execute();
                     $rawResult=$pdostmt->fetchAll();

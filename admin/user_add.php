@@ -5,16 +5,24 @@ require '../config/config.php';
 require '../config/common.php';
 
 if (empty($_SESSION['user_id']) && empty($_SESSION['logged_in'])) {
-  header('Location: login.php');
-
+  header('Location: /admin/login.php');
+}
+if ($_SESSION['role']!=1) {
+  header('Location: /admin/login.php');
 }
 if ($_POST) {
-  if (empty($_POST['name']) || empty($_POST['email']) || empty($_POST['password']) || strlen($_POST['password'])<4) {
+  if (empty($_POST['name']) || empty($_POST['email']) || empty($_POST['phone']) || empty($_POST['address']) || empty($_POST['password']) || strlen($_POST['password'])<4) {
     if (empty($_POST['name'])) {
       $name_error = 'Fill in name';
     }
     if (empty($_POST['email'])) {
       $email_error = 'Fill in email';
+    }
+    if (empty($_POST['phone'])) {
+      $phone_error = 'Fill in phone number';
+    }
+    if (empty($_POST['address'])) {
+      $address_error = 'Fill in address';
     }
     if (empty($_POST['password'])) {
       $password_error = 'Fill in password';
@@ -25,6 +33,8 @@ if ($_POST) {
   }else {
     $name = $_POST['name'];
     $email = $_POST['email'];
+    $phone = $_POST['phone'];
+    $address = $_POST['address'];
     $password = password_hash($_POST['password'],PASSWORD_DEFAULT);
     if (empty($_POST['role'])) {
       $role=0;
@@ -40,12 +50,12 @@ if ($_POST) {
     if ($user) {
       echo "<script>alert('Email already used')</script>";
     }else {
-      $pdostmt= $pdo-> prepare("INSERT INTO users(name,email,password,role) VALUES (:name,:email,:password,:role)");
+      $pdostmt= $pdo-> prepare("INSERT INTO users(name,email,password,role,phone,address) VALUES (:name,:email,:password,:role,:phone,:address)");
       $result=$pdostmt->execute(
         array(
-          ':name'=>$name,':email'=>$email,':password'=>$password,':role'=>$role)
+          ':name'=>$name,':email'=>$email,':password'=>$password,':role'=>$role,':phone'=>$phone,':address'=>$address)
       );
-      if ($result) {        
+      if ($result) {
         echo "<script>alert('New user is added');window.location.href='user_list.php';</script>";
       }
     }
@@ -69,6 +79,14 @@ if ($_POST) {
                 <div class="form-group">
                   <label for="">Email</label><p style="color:red"><?php echo empty($email_error) ? '':'*'.$email_error ?></p>
                   <input type="email" class="form-control" name="email" value="" >
+                </div>
+                <div class="form-group">
+                  <label for="">Phone</label><p style="color:red"><?php echo empty($phone_error) ? '':'*'.$phone_error ?></p>
+                  <input type="text" class="form-control" name="phone" value="" >
+                </div>
+                <div class="form-group">
+                  <label for="">Address</label><p style="color:red"><?php echo empty($address_error) ? '':'*'.$address_error ?></p>
+                  <input type="text" class="form-control" name="address" value="" >
                 </div>
                 <div class="form-group">
                   <label for="">Password</label><p style="color:red"><?php echo empty($password_error) ? '':'*'.$password_error ?></p>

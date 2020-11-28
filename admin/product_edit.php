@@ -5,7 +5,11 @@ require '../config/config.php';
 require '../config/common.php';
 
 if (empty($_SESSION['user_id']) && empty($_SESSION['logged_in'])) {
-  header('Location: login.php');
+  header('Location: /admin/login.php');
+}
+
+if ($_SESSION['role']!=1) {
+  header('Location: /admin/login.php');
 }
 
 if ($_POST) {
@@ -64,7 +68,7 @@ if ($_POST) {
           array(':name'=>$name,':description'=>$desc,':category'=>$category,':quantity'=>$qty,':price'=>$pri,':image'=>$img,':id'=>$id)
         );
         if ($result) {
-          
+
           echo "<script>alert('Product is successfully updated');window.location.href='index.php';</script>";
         }
       }

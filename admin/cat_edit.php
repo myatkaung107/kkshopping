@@ -5,6 +5,10 @@ require '../config/config.php';
 require '../config/common.php';
 
 if (empty($_SESSION['user_id']) && empty($_SESSION['logged_in'])) {
+  header('Location: /admin/login.php');
+}
+
+if ($_SESSION['role']!=1) {
   header('Location: login.php');
 }
 

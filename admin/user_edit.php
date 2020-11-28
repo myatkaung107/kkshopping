@@ -4,10 +4,13 @@ require '../config/common.php';
 session_start();
 
 if (empty($_SESSION['user_id']) && empty($_SESSION['logged_in'])) {
-  header('Location: login.php');
+  header('Location: /admin/login.php');
+}
+if ($_SESSION['role']!=1) {
+  header('Location: /admin/login.php');
 }
 if ($_POST) {
-  if (empty($_POST['name']) || empty($_POST['email'])) {
+  if (empty($_POST['name']) || empty($_POST['email']) || empty($_POST['phone']) || empty($_POST['address']) || empty($_POST['password']) || strlen($_POST['password'])<4) {
     if (empty($_POST['name'])) {
       $name_error = 'Fill in name';
     }
@@ -21,6 +24,8 @@ if ($_POST) {
     $id = $_GET['id'];
     $name = $_POST['name'];
     $email = $_POST['email'];
+    $phone = $_POST['phone'];
+    $address = $_POST['address'];
     $password = password_hash($_POST['password'],PASSWORD_DEFAULT);
     if (empty($_POST['role'])) {
       $role=0;
@@ -38,9 +43,9 @@ if ($_POST) {
       echo "<script>alert('Email already used')</script>";
     }else {
       if ($password !=null) {
-        $pdostmt= $pdo-> prepare("UPDATE users SET name='$name',email='$email',password='$password',role='$role' WHERE id='$id'");
+        $pdostmt= $pdo-> prepare("UPDATE users SET name='$name',email='$email',password='$password',role='$role',phone='$phone',address='$address' WHERE id='$id'");
       }else {
-        $pdostmt= $pdo-> prepare("UPDATE users SET name='$name',email='$email',role='$role' WHERE id='$id'");
+        $pdostmt= $pdo-> prepare("UPDATE users SET name='$name',email='$email',role='$role',phone='$phone',address='$address' WHERE id='$id'");
       }
       $result=$pdostmt->execute();
       if ($result) {
@@ -71,6 +76,14 @@ if ($_POST) {
                 <div class="form-group">
                   <label for="">Email</label><p style="color:red"><?php echo empty($email_error) ? '':'*'.$email_error ?></p>
                   <input type="email" class="form-control" name="email" value="<?php echo escape($result[0]['email']) ?>" >
+                </div>
+                <div class="form-group">
+                  <label for="">Phone</label><p style="color:red"><?php echo empty($phone_error) ? '':'*'.$phone_error ?></p>
+                  <input type="text" class="form-control" name="phone" value="" >
+                </div>
+                <div class="form-group">
+                  <label for="">Address</label><p style="color:red"><?php echo empty($address_error) ? '':'*'.$address_error ?></p>
+                  <input type="text" class="form-control" name="address" value="" >
                 </div>
                 <div class="form-group">
                   <label for="">Password</label><p style="color:red"><?php echo empty($password_error) ? '':'*'.$password_error ?></p>
