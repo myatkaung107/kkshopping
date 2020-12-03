@@ -1,3 +1,56 @@
+<?php
+
+session_start();
+
+require 'config/config.php';
+require 'config/common.php';
+
+if (empty($_SESSION['user_id']) && empty($_SESSION['logged_in'])) {
+  header('Location: login.php');
+}
+
+if (!empty($_SESSION['cart'])) {
+	$userId = $_SESSION['user_id'];
+	$total =0;
+	foreach ($_SESSION['cart'] as $key => $qty) {
+		$id = str_replace('id','',$key);
+		$pdostmt=$pdo->prepare("SELECT * FROM products WHERE id=".$id);
+		$pdostmt->execute();
+		$result=$pdostmt->fetch(PDO::FETCH_ASSOC);
+		$total += $result['price']*$qty;
+	}
+	// insert into sale_order
+	$pdostmt=$pdo->prepare("INSERT INTO sale_order(user_id,total_price,order_date) VALUES(:user_id,:total_price,:order_date)");
+	$result=$pdostmt->execute(
+			array(':user_id'=>$userId,':total_price'=>$total,':order_date'=>date('Y-m-d H:i:s'))
+		);
+
+		if ($result) {
+			// insert into Sale_order_details
+			$saleOrderId=$pdo->lastInsertId();
+			foreach ($_SESSION['cart'] as $key => $qrt) {
+				$id=str_replace('id','',$key);
+				$pdostmt=$pdo->prepare("INSERT INTO sale_order_details(sale_order_id,product_id,quantity) VALUES(:sid,:pid,:qty)");
+				$result=$pdostmt->execute(
+					array(':sid'=>$saleOrderId,':pid'=>$id,':qty'=>$qty)
+				);
+				$qtystmt=$pdo->prepare("SELECT quantity FROM products WHERE id=".$id);
+				$qtystmt->execute();
+				$qResult=$qtystmt->fetch(PDO::FETCH_ASSOC);
+
+				$updateResult= $qResult['quantity'] - $qty;
+
+				$pdostmt=$pdo->prepare("UPDATE products SET quantity=:qty WHERE id=:pid");
+				$result=$pdostmt->execute(
+					array(':qty'=>$updateResult,':pid'=>$id)
+				);
+			}
+			unset($_SESSION['cart']);
+		}
+}
+
+?>
+
 <!DOCTYPE html>
 <html lang="zxx" class="no-js">
 
@@ -15,7 +68,7 @@
 	<!-- meta character set -->
 	<meta charset="UTF-8">
 	<!-- Site Title -->
-	<title>Karma Shop</title>
+	<title>K.K mart</title>
 
 	<!--
 		CSS
@@ -38,7 +91,7 @@
 			<nav class="navbar navbar-expand-lg navbar-light main_box">
 				<div class="container">
 					<!-- Brand and toggle get grouped for better mobile display -->
-					<a class="navbar-brand logo_h" href="index.html"><h4>K.K mart</h4></a>
+					<a class="navbar-brand logo_h" href="index.php"><h4>K.K mart</h4></a>
 					<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
 					 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
 						<span class="icon-bar"></span>
@@ -87,112 +140,6 @@
 	<section class="order_details section_gap">
 		<div class="container">
 			<h3 class="title_confirmation">Thank you. Your order has been received.</h3>
-			<div class="row order_d_inner">
-				<div class="col-lg-6">
-					<div class="details_item">
-						<h4>Order Info</h4>
-						<ul class="list">
-							<li><a href="#"><span>Order number</span> : 60235</a></li>
-							<li><a href="#"><span>Date</span> : Los Angeles</a></li>
-							<li><a href="#"><span>Total</span> : USD 2210</a></li>
-							<li><a href="#"><span>Payment method</span> : Check payments</a></li>
-						</ul>
-					</div>
-				</div>
-				<div class="col-lg-6">
-					<div class="details_item">
-						<h4>Shipping Address</h4>
-						<ul class="list">
-							<li><a href="#"><span>Street</span> : 56/8</a></li>
-							<li><a href="#"><span>City</span> : Los Angeles</a></li>
-							<li><a href="#"><span>Country</span> : United States</a></li>
-							<li><a href="#"><span>Postcode </span> : 36952</a></li>
-						</ul>
-					</div>
-				</div>
-			</div>
-			<div class="order_details_table">
-				<h2>Order Details</h2>
-				<div class="table-responsive">
-					<table class="table">
-						<thead>
-							<tr>
-								<th scope="col">Product</th>
-								<th scope="col">Quantity</th>
-								<th scope="col">Total</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr>
-								<td>
-									<p>Pixelstore fresh Blackberry</p>
-								</td>
-								<td>
-									<h5>x 02</h5>
-								</td>
-								<td>
-									<p>$720.00</p>
-								</td>
-							</tr>
-							<tr>
-								<td>
-									<p>Pixelstore fresh Blackberry</p>
-								</td>
-								<td>
-									<h5>x 02</h5>
-								</td>
-								<td>
-									<p>$720.00</p>
-								</td>
-							</tr>
-							<tr>
-								<td>
-									<p>Pixelstore fresh Blackberry</p>
-								</td>
-								<td>
-									<h5>x 02</h5>
-								</td>
-								<td>
-									<p>$720.00</p>
-								</td>
-							</tr>
-							<tr>
-								<td>
-									<h4>Subtotal</h4>
-								</td>
-								<td>
-									<h5></h5>
-								</td>
-								<td>
-									<p>$2160.00</p>
-								</td>
-							</tr>
-							<tr>
-								<td>
-									<h4>Shipping</h4>
-								</td>
-								<td>
-									<h5></h5>
-								</td>
-								<td>
-									<p>Flat rate: $50.00</p>
-								</td>
-							</tr>
-							<tr>
-								<td>
-									<h4>Total</h4>
-								</td>
-								<td>
-									<h5></h5>
-								</td>
-								<td>
-									<p>$2210.00</p>
-								</td>
-							</tr>
-						</tbody>
-					</table>
-				</div>
-			</div>
 		</div>
 	</section>
 	<!--================End Order Details Area =================-->

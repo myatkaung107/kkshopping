@@ -29,39 +29,36 @@ if (!empty($_POST['search'])) {
 
 		if (empty($_POST['search'])&&empty($_COOKIE['search'])) {
 			if (!empty($_GET['category_id'])) {
-				print"<pre>";
-				print_r($_GET['category_id']);
-				exit();
 				$catid=$_GET['category_id'];
-				$pdostmt=$pdo->prepare("SELECT * FROM products WHERE category_id=".$_GET['category_id']);
+				$pdostmt=$pdo->prepare("SELECT * FROM products WHERE category_id=$catid AND quantity > 0 ORDER BY id DESC");
 				$pdostmt->execute();
 				$rawResult=$pdostmt->fetchAll();
 
 				$total_pages=ceil(count($rawResult)/$numOfrecs);
 
-				$pdostmt=$pdo->prepare("SELECT * FROM products WHERE category_id=".$_GET['category_id']." LIMIT $offset,$numOfrecs");
+				$pdostmt=$pdo->prepare("SELECT * FROM products WHERE category_id=$catid AND quantity > 0 LIMIT $offset,$numOfrecs");
 				$pdostmt->execute();
 				$result=$pdostmt->fetchAll();
 			}else {
-				$pdostmt=$pdo->prepare("SELECT * FROM products ORDER BY id DESC");
+				$pdostmt=$pdo->prepare("SELECT * FROM products WHERE quantity > 0 ORDER BY id DESC");
 				$pdostmt->execute();
 				$rawResult=$pdostmt->fetchAll();
 
 				$total_pages=ceil(count($rawResult)/$numOfrecs);
 
-				$pdostmt=$pdo->prepare("SELECT * FROM products ORDER BY id DESC LIMIT $offset,$numOfrecs");
+				$pdostmt=$pdo->prepare("SELECT * FROM products WHERE quantity > 0 ORDER BY id DESC LIMIT $offset,$numOfrecs");
 				$pdostmt->execute();
 				$result=$pdostmt->fetchAll();
 			}
 		}else {
 			$searchKey=!empty($_POST['search']) ? $_POST['search'] : $_COOKIE['search'];
-			$pdostmt=$pdo->prepare("SELECT * FROM products WHERE name LIKE '%$searchKey%' ORDER BY id DESC");
+			$pdostmt=$pdo->prepare("SELECT * FROM products WHERE name LIKE '%$searchKey%' AND quantity > 0 ORDER BY id DESC");
 			$pdostmt->execute();
 			$rawResult=$pdostmt->fetchAll();
 
 			$total_pages=ceil(count($rawResult)/$numOfrecs);
 
-			$pdostmt=$pdo->prepare("SELECT * FROM products WHERE name LIKE '%$searchKey%' ORDER BY id DESC LIMIT $offset,$numOfrecs");
+			$pdostmt=$pdo->prepare("SELECT * FROM products WHERE name LIKE '%$searchKey%' AND quantity > 0 ORDER BY id DESC LIMIT $offset,$numOfrecs");
 			$pdostmt->execute();
 			$result=$pdostmt->fetchAll();
 		}
@@ -80,8 +77,8 @@ if (!empty($_POST['search'])) {
 								$catstmt->execute();
 								$catResult=$catstmt->fetchAll();
 							?>
-							<?php foreach ($catResult as $value) { ?>
-								<a data-toggle="collapse" href="index.php?category_id=<?php echo $value['id'] ?>"><span class="lnr lnr-arrow-right"></span><?php echo escape($value['name']) ?></a>
+							<?php foreach ($catResult as $key => $value) { ?>
+								<a href="index.php?category_id=<?php echo $value['id'] ?>"><span class="lnr lnr-arrow-right"></span><?php echo escape($value['name']) ?></a>
 							<?php } ?>
 						</li>
 				</div>
@@ -119,15 +116,21 @@ if (!empty($_POST['search'])) {
 													<h6 class="l-through"><?php echo escape($value['price']) ?></h6>
 												</div>
 												<div class="prd-bottom">
-
-													<a href="" class="social-info">
-														<span class="ti-bag"></span>
-														<p class="hover-text">add to bag</p>
-													</a>
-													<a href="product_detail.php?id=<?php echo $value['id'] ?>" class="social-info">
-														<span class="lnr lnr-move"></span>
-														<p class="hover-text">view more</p>
-													</a>
+													<form  action="addtocart.php" method="post">
+														<input type="hidden" name="_token" value="<?php echo $_SESSION['_token']; ?>">
+								            <input type="hidden" name="id" value="<?php echo escape($value['id']) ?>">
+														<input type="hidden" name="qty" value="1">
+														<div class="social-info">
+															<button type="submit" style="display:contents" class="social-info">
+																<span class="ti-bag"></span>
+																<p class="hover-text" style="margin-left: -15px;">add to bag</p>
+															</button>
+														</div>
+														<a href="product_detail.php?id=<?php echo $value['id'] ?>" class="social-info">
+															<span class="lnr lnr-move"></span>
+															<p class="hover-text">view more</p>
+														</a>
+													</form>
 												</div>
 											</div>
 										</div>

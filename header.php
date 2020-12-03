@@ -2,6 +2,7 @@
 	if (session_status()==PHP_SESSION_NONE) {
 		session_start();
 	}
+
 ?>
 <!DOCTYPE html>
 <html lang="zxx" class="no-js">
@@ -20,7 +21,7 @@
 	<!-- meta character set -->
 	<meta charset="UTF-8">
 	<!-- Site Title -->
-	<title>Karma Shop</title>
+	<title>K.K mart</title>
 
 	<!--
             CSS
@@ -51,10 +52,18 @@
 						<span class="icon-bar"></span>
 					</button>
 					<!-- Collect the nav links, forms, and other content for toggling -->
+					<?php
+					$cart =0;
+						if (isset($_SESSION['cart'])) {
+							foreach ($_SESSION['cart'] as $key => $qty) {
+								$cart += $qty;
+							}
+						}
+					?>
 					<div class="collapse navbar-collapse offset" id="navbarSupportedContent">
 						<ul class="nav navbar-nav menu_nav ml-auto">
 							<ul class="nav navbar-nav navbar-right">
-								<li class="nav-item"><a href="#" class="cart"><span class="ti-bag"></span></a></li>
+								<li class="nav-item"><a href="cart.php" class="cart"><span class="ti-bag"><?php echo $cart ?></span></a></li>
 								<li class="nav-item">
 									<button class="search"><span class="lnr lnr-magnifier" id="search"></span></button>
 								</li>
@@ -78,7 +87,7 @@
 	<!-- End Header Area -->
 
 	<!-- Start Banner Area -->
-	<section class="banner-area organic-breadcrumb">
+	<section class="banner-area organic-breadcrumb" style="margin-bottom:0">
 		<div class="container">
 			<div class="breadcrumb-banner d-flex flex-wrap align-items-center justify-content-end">
 				<div class="col-first">
