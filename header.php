@@ -1,8 +1,11 @@
 <?php
-	if (session_status()==PHP_SESSION_NONE) {
-		session_start();
-	}
+if (session_status()==PHP_SESSION_NONE) {
+	session_start();
+}
 
+if (empty($_SESSION['user_id']) && empty($_SESSION['logged_in'])) {
+  header('Location: login.php');
+}
 ?>
 <!DOCTYPE html>
 <html lang="zxx" class="no-js">
@@ -91,7 +94,8 @@
 		<div class="container">
 			<div class="breadcrumb-banner d-flex flex-wrap align-items-center justify-content-end">
 				<div class="col-first">
-					<h1>Welcome K.K mart</h1>
+					<h1>Welcome <?php echo $_SESSION['username'] ?></h1>
+					<a href="logout.php" class="primary-btn" style="color:black;background:white;line-height:35px">Logout</a>
 				</div>
 			</div>
 		</div>

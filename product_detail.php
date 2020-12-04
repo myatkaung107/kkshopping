@@ -6,6 +6,10 @@ if (session_status()==PHP_SESSION_NONE) {
 require 'config/config.php';
 require 'config/common.php';
 
+if (empty($_SESSION['user_id']) && empty($_SESSION['logged_in'])) {
+  header('Location: login.php');
+}
+
 $pdostmt=$pdo->prepare("SELECT * FROM products WHERE id=".$_GET['id']);
 $pdostmt->execute();
 $result=$pdostmt->fetch(PDO::FETCH_ASSOC);

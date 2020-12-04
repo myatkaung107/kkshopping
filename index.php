@@ -5,6 +5,10 @@ if (session_status()==PHP_SESSION_NONE) {
 require 'config/config.php';
 require 'config/common.php';
 
+if (empty($_SESSION['user_id']) && empty($_SESSION['logged_in'])) {
+	header('Location: login.php');
+}
+
 if (!empty($_POST['search'])) {
   setcookie('search',$_POST['search'],time() + (86400*30),"/");
 }else {

@@ -45,13 +45,33 @@ if ($_POST) {
     if (is_numeric($_POST['price']) !=1) {
       $pri_error="This blank should be integer value";
     }
+    if ($qty_error =='' && $pri_error =='') {
+      if ($_FILES['image']['name'] != null) {
+        $file= 'images/'.($_FILES['image']['name']);
+        $imageType= pathinfo($file,PATHINFO_EXTENSION);
 
-    if ($_FILES['image']['name'] != null) {
-      $file= 'images/'.($_FILES['image']['name']);
-      $imageType= pathinfo($file,PATHINFO_EXTENSION);
+        if ($imageType != 'png' && $imageType != 'jpg' && $imageType != 'jpeg') {
+          echo "<script>alert('Image must be png or jpg or jpeg')</script>";
+        }else {
+          $name = $_POST['name'];
+          $desc = $_POST['description'];
+          $category=$_POST['category'];
+          $qty = $_POST['quantity'];
+          $pri = $_POST['price'];
+          $id = $_POST['id'];
+          $img = $_FILES['image']['name'];
 
-      if ($imageType != 'png' && $imageType != 'jpg' && $imageType != 'jpeg') {
-        echo "<script>alert('Image must be png or jpg or jpeg')</script>";
+          move_uploaded_file($_FILES['image']['tmp_name'],$file);
+
+          $pdostmt=$pdo->prepare("UPDATE products SET name=:name,description=:description,category_id=:category,quantity=:quantity,price=:price,image=:image WHERE id=:id");
+          $result=$pdostmt->execute(
+            array(':name'=>$name,':description'=>$desc,':category'=>$category,':quantity'=>$qty,':price'=>$pri,':image'=>$img,':id'=>$id)
+          );
+          if ($result) {
+
+            echo "<script>alert('Product is successfully updated');window.location.href='index.php';</script>";
+          }
+        }
       }else {
         $name = $_POST['name'];
         $desc = $_POST['description'];
@@ -59,35 +79,17 @@ if ($_POST) {
         $qty = $_POST['quantity'];
         $pri = $_POST['price'];
         $id = $_POST['id'];
-        $img = $_FILES['image']['name'];
 
-        move_uploaded_file($_FILES['image']['tmp_name'],$file);
-
-        $pdostmt=$pdo->prepare("UPDATE products SET name=:name,description=:description,category_id=:category,quantity=:quantity,price=:price,image=:image WHERE id=:id");
+        $pdostmt=$pdo->prepare("UPDATE products SET name=:name,description=:description,category_id=:category,quantity=:quantity,price=:price WHERE id=:id");
         $result=$pdostmt->execute(
-          array(':name'=>$name,':description'=>$desc,':category'=>$category,':quantity'=>$qty,':price'=>$pri,':image'=>$img,':id'=>$id)
+          array(':name'=>$name,':description'=>$desc,':category'=>$category,':quantity'=>$qty,':price'=>$pri,':id'=>$id)
         );
         if ($result) {
-
           echo "<script>alert('Product is successfully updated');window.location.href='index.php';</script>";
         }
       }
-    }else {
-      $name = $_POST['name'];
-      $desc = $_POST['description'];
-      $category=$_POST['category'];
-      $qty = $_POST['quantity'];
-      $pri = $_POST['price'];
-      $id = $_POST['id'];
-
-      $pdostmt=$pdo->prepare("UPDATE products SET name=:name,description=:description,category_id=:category,quantity=:quantity,price=:price WHERE id=:id");
-      $result=$pdostmt->execute(
-        array(':name'=>$name,':description'=>$desc,':category'=>$category,':quantity'=>$qty,':price'=>$pri,':id'=>$id)
-      );
-      if ($result) {
-        echo "<script>alert('Product is successfully updated');window.location.href='index.php';</script>";
-      }
     }
+
   }
 }
 

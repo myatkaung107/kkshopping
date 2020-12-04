@@ -44,30 +44,33 @@ if ($_POST) {
     if (is_numeric($_POST['price']) !=1) {
       $pri_error="This blank should be integer value";
     }
-    $file= 'images/'.($_FILES['image']['name']);
-    $imageType= pathinfo($file,PATHINFO_EXTENSION);
+    if ($qty_error =='' && $pri_error =='') {
+      $file= 'images/'.($_FILES['image']['name']);
+      $imageType= pathinfo($file,PATHINFO_EXTENSION);
 
-    if ($imageType != 'png' && $imageType != 'jpg' && $imageType != 'jpeg') {
-      echo "<script>alert('Image must be png or jpg or jpeg')</script>";
-    }else {
-      $name = $_POST['name'];
-      $desc = $_POST['description'];
-      $category=$_POST['category'];
-      $qty = $_POST['quantity'];
-      $pri = $_POST['price'];
-      $img = $_FILES['image']['name'];
+      if ($imageType != 'png' && $imageType != 'jpg' && $imageType != 'jpeg') {
+        echo "<script>alert('Image must be png or jpg or jpeg')</script>";
+      }else {
+        $name = $_POST['name'];
+        $desc = $_POST['description'];
+        $category=$_POST['category'];
+        $qty = $_POST['quantity'];
+        $pri = $_POST['price'];
+        $img = $_FILES['image']['name'];
 
-      move_uploaded_file($_FILES['image']['tmp_name'],$file);
+        move_uploaded_file($_FILES['image']['tmp_name'],$file);
 
-      $pdostmt =$pdo->prepare("INSERT INTO products(name,description,category_id,quantity,price,image)
-      VALUES (:name,:description,:category,:quantity,:price,:image)");
-      $result=$pdostmt->execute(
-        array(':name'=>$name,':description'=>$desc,':category'=>$category,':quantity'=>$qty,':price'=>$pri,':image'=>$img)
-      );
-      if ($result) {
-        echo "<script>alert('New Product is successfully added');window.location.href='index.php';</script>";
+        $pdostmt =$pdo->prepare("INSERT INTO products(name,description,category_id,quantity,price,image)
+        VALUES (:name,:description,:category,:quantity,:price,:image)");
+        $result=$pdostmt->execute(
+          array(':name'=>$name,':description'=>$desc,':category'=>$category,':quantity'=>$qty,':price'=>$pri,':image'=>$img)
+        );
+        if ($result) {
+          echo "<script>alert('New Product is successfully added');window.location.href='index.php';</script>";
+        }
       }
     }
+
   }
 }
 
